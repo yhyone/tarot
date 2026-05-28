@@ -31,7 +31,7 @@
       <h2 class="step-title">选择牌阵</h2>
       <p class="step-desc">请选择你想要使用的塔罗牌阵</p>
 
-      <div class="spread-cards">
+      <div class="spread-cards" id="spread-cards-list">
         <div class="spread-card" data-spread="single">
           <div class="spread-preview">
             <svg viewBox="0 0 60 80"><rect x="10" y="10" width="40" height="60" rx="6" fill="rgba(196,154,114,0.3)" stroke="#ad7a49" stroke-width="1.5"/><text x="30" y="46" text-anchor="middle" font-size="18" fill="#ad7a49">1</text></svg>
@@ -63,6 +63,7 @@
 
       <!-- 抽牌方式 -->
       <div class="draw-mode-section" id="draw-mode-section" style="display:none">
+        <button class="btn btn-ghost" id="btn-back-to-spreads" style="margin-bottom:0.5rem;">← 返回</button>
         <h3 class="draw-mode-title">抽牌方式</h3>
         <div class="draw-mode-options">
           <label class="draw-mode-card" id="mode-random">

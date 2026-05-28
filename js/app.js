@@ -67,9 +67,25 @@ function goToStep(stepId) {
 // ---------- 步骤1：选择牌阵 + 抽牌方式 ----------
 function initSpreadSelection() {
   const cards = document.querySelectorAll('.spread-card');
+  const spreadList = document.getElementById('spread-cards-list');
   const drawModeSection = document.getElementById('draw-mode-section');
   const spreadActions = document.getElementById('spread-actions');
   const btnToDraw = document.getElementById('btn-to-draw');
+
+  function showDrawMode() {
+    spreadList.style.display = 'none';
+    drawModeSection.style.display = 'block';
+    spreadActions.style.display = 'flex';
+  }
+
+  function showSpreads() {
+    spreadList.style.display = '';
+    drawModeSection.style.display = 'none';
+    spreadActions.style.display = 'none';
+    document.querySelector('input[name="drawMode"]:checked').checked = false;
+  }
+
+  document.getElementById('btn-back-to-spreads').addEventListener('click', showSpreads);
 
   cards.forEach(card => {
     card.addEventListener('click', function(e) {
@@ -77,9 +93,7 @@ function initSpreadSelection() {
       cards.forEach(c => c.classList.remove('selected'));
       this.classList.add('selected');
       state.spread = this.dataset.spread;
-      drawModeSection.style.display = 'block';
-      spreadActions.style.display = 'flex';
-      drawModeSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      showDrawMode();
     });
   });
 
@@ -90,9 +104,7 @@ function initSpreadSelection() {
       cards.forEach(c => c.classList.remove('selected'));
       const card = document.querySelector(`.spread-card[data-spread="${state.spread}"]`);
       if (card) card.classList.add('selected');
-      drawModeSection.style.display = 'block';
-      spreadActions.style.display = 'flex';
-      drawModeSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      showDrawMode();
     });
   });
 
@@ -657,6 +669,7 @@ function resetAll() {
   document.querySelectorAll('input[name="drawMode"]:checked').forEach(r => r.checked = false);
   document.querySelectorAll('.spread-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('draw-mode-section').style.display = 'none';
+  document.getElementById('spread-cards-list').style.display = '';
   document.getElementById('spread-actions').style.display = 'none';
   document.getElementById('draw-actions').style.display = 'none';
   const confirmArea = document.getElementById('pick-confirm-area');

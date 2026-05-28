@@ -68,24 +68,24 @@ body {
 .step-desc { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 1.8rem; }
 
 /* ---------- 牌阵卡片 ---------- */
-.spread-cards { display: flex; flex-direction: column; gap: 1rem; }
+.spread-cards { display: flex; flex-direction: column; gap: 0.7rem; }
 
 .spread-card {
-  display: flex; align-items: center; gap: 1rem;
+  display: flex; align-items: center; gap: 0.8rem;
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1.2rem;
+  border-radius: 14px; padding: 0.8rem 1rem;
   box-shadow: var(--shadow-sm); cursor: pointer; transition: all var(--transition);
 }
-.spread-card:hover { box-shadow: var(--shadow); border-color: var(--accent); transform: translateY(-2px); }
+.spread-card:hover { box-shadow: var(--shadow); border-color: var(--accent); transform: translateY(-1px); }
 .spread-card.selected { border-color: var(--accent-strong); box-shadow: 0 0 0 3px rgba(173,122,73,0.15); background: #fefaf5; }
 .spread-preview { flex-shrink: 0; }
-.spread-preview svg { display: block; }
+.spread-preview svg { display: block; max-height: 55px; width: auto; }
 .spread-info { flex: 1; min-width: 0; }
-.spread-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.3rem; }
-.spread-desc-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.5rem; }
+.spread-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.15rem; }
+.spread-desc-text { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 0.35rem; }
 .spread-rule {
-  font-size: 0.8rem; color: var(--muted); line-height: 1.5;
-  padding: 0.5rem 0.7rem; background: rgba(196,154,114,0.08); border-radius: 8px;
+  font-size: 0.73rem; color: var(--muted); line-height: 1.4;
+  padding: 0.35rem 0.5rem; background: rgba(196,154,114,0.08); border-radius: 6px;
 }
 .spread-rule strong { color: var(--accent-strong); }
 
@@ -324,7 +324,7 @@ body {
   overflow: hidden; cursor: pointer; background: #fdf5ec;
 }
 .result-card-img-large img {
-  width: 100%; max-height: 400px; object-fit: contain; display: block;
+  width: 100%; max-height: 220px; object-fit: contain; display: block;
 }
 .result-card-img-large:hover img {
   transform: scale(1.02); transition: transform 0.3s ease;
@@ -389,9 +389,9 @@ body {
   .app-container { padding: 1rem 0.75rem 3rem; }
   .app-header { padding: 1rem 0; }
 
-  .spread-card { flex-direction: column; align-items: stretch; text-align: center; gap: 0.5rem; }
+  .spread-card { flex-direction: column; align-items: stretch; text-align: center; gap: 0.4rem; padding: 0.7rem; }
   .spread-preview { display: flex; justify-content: center; }
-  .spread-preview svg { max-width: 120px; height: auto; }
+  .spread-preview svg { max-width: 80px; height: auto; }
   .btn-outline { align-self: center; }
 
   .draw-mode-options { grid-template-columns: 1fr; }
@@ -400,7 +400,7 @@ body {
   .draw-grid.selfpick { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
 
   .result-card-header { flex-direction: column; align-items: center; text-align: center; }
-  .result-card-img-large img { max-height: 280px; }
+  .result-card-img-large img { max-height: 180px; }
   .result-card-keywords { justify-content: center; }
   .step-actions { flex-direction: column; align-items: center; }
 }
