@@ -391,6 +391,7 @@ body {
 
   .spread-card { flex-direction: column; align-items: stretch; text-align: center; gap: 0.5rem; }
   .spread-preview { display: flex; justify-content: center; }
+  .spread-preview svg { max-width: 120px; height: auto; }
   .btn-outline { align-self: center; }
 
   .draw-mode-options { grid-template-columns: 1fr; }
