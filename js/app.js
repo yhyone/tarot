@@ -416,238 +416,194 @@ function confirmSelfPick(config) {
 
 // ---------- 步骤4：结果展示 ----------
 function showResults() {
-  const config = spreadConfig[state.spread];
-  document.getElementById('result-spread-name').textContent =
-    `牌阵：${config.name}  |  模式：${state.drawMode === 'random' ? '随机抽取' : '自选牌'}  |  解读方向：${state.categories.map(c => categoryLabels[c]).join('、')}`;
+  try {
+    const config = spreadConfig[state.spread];
+    if (!config || !state.drawnCards || state.drawnCards.length === 0) {
+      console.error('showResults: 缺少牌阵配置或抽牌数据', state);
+      alert('出错了，请返回重新抽牌');
+      return;
+    }
 
-  const container = document.getElementById('result-container');
-  container.innerHTML = '';
+    document.getElementById('result-spread-name').textContent =
+      `牌阵：${config.name}  |  模式：${state.drawMode === 'random' ? '随机抽取' : '自选牌'}  |  解读方向：${state.categories.map(c => categoryLabels[c]).join('、')}`;
 
-  // 三张牌：先展示综合解读
-  const summaryDiv = document.getElementById('result-summary');
-  if (config.count === 3) {
-    summaryDiv.style.display = 'block';
-    summaryDiv.innerHTML = buildSpreadSummary(state.drawnCards, config.positions, state.question, state.categories);
-  } else {
-    summaryDiv.style.display = 'none';
+    const container = document.getElementById('result-container');
+    container.innerHTML = '';
+
+    // 三张牌：先展示综合解读
+    const summaryDiv = document.getElementById('result-summary');
+    if (config.count === 3) {
+      summaryDiv.style.display = 'block';
+      summaryDiv.innerHTML = buildSpreadSummary(state.drawnCards, config.positions, state.question, state.categories);
+    } else {
+      summaryDiv.style.display = 'none';
+    }
+
+    // 用文档片段批量构建，避免多次innerHTML
+    const fragment = document.createDocumentFragment();
+
+    state.drawnCards.forEach((card, i) => {
+      const pos = config.positions[i] || '';
+      const imgPath = getCardImagePath(card);
+      const suitText = card.suit ? ' · ' + (suitLabels[card.suit] || '') : '';
+
+      // 构建body HTML
+      const bodyParts = [];
+      bodyParts.push('<h4>牌意概述</h4><p>' + card.meaning + '</p>');
+
+      if (state.categories.includes('career')) {
+        bodyParts.push('<h4>💼 事业解读</h4><p>' + card.career + '</p>');
+      }
+      if (state.categories.includes('love')) {
+        bodyParts.push('<h4>💕 婚姻/爱情解读</h4><p>' + card.love + '</p>');
+      }
+      if (state.categories.includes('health')) {
+        bodyParts.push('<h4>🌿 健康解读</h4><p>' + card.health + '</p>');
+      }
+
+      bodyParts.push(buildCardAdvice(card, pos, state.question, state.categories));
+
+      const bodyHTML = bodyParts.join('');
+
+      // 构建关键词标签
+      const keywordTags = (card.keywords || []).map(k => '<span class="keyword-tag">' + k + '</span>').join('');
+
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'result-card';
+      cardDiv.innerHTML =
+        '<div class="result-card-img-large" onclick="openCardModal(\'' + imgPath + '\')">' +
+          '<img src="' + imgPath + '" alt="' + card.nameCN + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+        '</div>' +
+        '<div class="result-card-header">' +
+          '<div class="result-card-title">' +
+            '<span class="result-position">' + pos + '</span>' +
+            '<h3 class="result-card-name">' + card.nameCN + '</h3>' +
+            '<p style="color:var(--muted);font-size:0.85rem;">' + card.nameEN + suitText + '</p>' +
+            '<div class="result-card-keywords">' + keywordTags + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="result-card-body">' + bodyHTML + '</div>';
+
+      fragment.appendChild(cardDiv);
+    });
+
+    container.appendChild(fragment);
+
+    document.getElementById('btn-redraw-result').onclick = function() {
+      initDraw();
+      goToStep('step-draw');
+    };
+    document.getElementById('btn-restart').onclick = resetAll;
+  } catch (e) {
+    console.error('showResults error:', e.message, e.stack);
+    alert('解读生成出错，请返回重新抽牌再试一次。');
   }
-
-  // 每张牌的详细解读
-  state.drawnCards.forEach((card, i) => {
-    const pos = config.positions[i];
-    const imgPath = getCardImagePath(card);
-
-    let bodyHTML = '';
-    bodyHTML += `<h4>牌意概述</h4><p>${card.meaning}</p>`;
-
-    if (state.categories.includes('career')) {
-      bodyHTML += `<h4>💼 事业解读</h4><p>${card.career}</p>`;
-    }
-    if (state.categories.includes('love')) {
-      bodyHTML += `<h4>💕 婚姻/爱情解读</h4><p>${card.love}</p>`;
-    }
-    if (state.categories.includes('health')) {
-      bodyHTML += `<h4>🌿 健康解读</h4><p>${card.health}</p>`;
-    }
-
-    // 针对问题的专属建议
-    bodyHTML += buildCardAdvice(card, pos, state.question, state.categories);
-
-    container.innerHTML += `
-      <div class="result-card">
-        <div class="result-card-img-large" onclick="openCardModal('${imgPath}')">
-          <img src="${imgPath}" alt="${card.nameCN}" loading="lazy"
-               onerror="this.style.display='none'">
-        </div>
-        <div class="result-card-header">
-          <div class="result-card-title">
-            <span class="result-position">${pos}</span>
-            <h3 class="result-card-name">${card.nameCN}</h3>
-            <p style="color:var(--muted);font-size:0.85rem;">${card.nameEN}${card.suit ? ' · ' + suitLabels[card.suit] : ''}</p>
-            <div class="result-card-keywords">
-              ${card.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
-            </div>
-          </div>
-        </div>
-        <div class="result-card-body">${bodyHTML}</div>
-      </div>
-    `;
-  });
-
-  document.getElementById('btn-redraw-result').onclick = () => {
-    initDraw();
-    goToStep('step-draw');
-  };
-  document.getElementById('btn-restart').onclick = resetAll;
 }
 
 // ---------- 综合解读（三张牌） ----------
 function buildSpreadSummary(cards, positions, question, categories) {
-  const [pastCard, nowCard, futureCard] = cards;
-  const catText = categories.map(c => categoryLabels[c]).join('和');
+  var pastCard = cards[0], nowCard = cards[1], futureCard = cards[2];
+  var catText = categories.map(function(c) { return categoryLabels[c]; }).join('和');
+  var q = question || '';
 
-  let html = `<h3>三牌综合解读</h3>`;
+  var html = '<h3>三牌综合解读</h3>';
+  html += '<p>你问的是：「<strong>' + q + '</strong>」。三张牌从过去、现在、未来三个维度，共同描绘了关于这个问题的完整图景。</p>';
 
-  // 开篇
-  html += `<p>你问的是：「<strong>${question}</strong>」。三张牌从过去、现在、未来三个维度，共同描绘了关于这个问题的完整图景。</p>`;
+  // 故事脉络
+  html += '<p style="margin-top:0.8rem;"><strong>故事的脉络：</strong>';
+  html += '过去的「' + pastCard.nameCN + '」（' + (pastCard.keywords[0] || '') + '）为起点，';
+  html += '到了现在，「' + nowCard.nameCN + '」（' + (nowCard.keywords[0] || '') + '）正在主导你的处境，';
+  html += '未来的「' + futureCard.nameCN + '」（' + (futureCard.keywords[0] || '') + '）则指明了方向。</p>';
 
-  // 故事线：每张牌选一个核心关键词作为叙事锚点
-  const pastAnchor = pastCard.keywords[0];
-  const nowAnchor = nowCard.keywords[0];
-  const futureAnchor = futureCard.keywords[0];
+  // 三张牌之间的关联
+  html += '<p>' + buildStoryline(pastCard, nowCard, futureCard) + '</p>';
 
-  html += `<p style="margin-top:0.8rem;"><strong>故事的脉络：</strong>过去的「${pastCard.nameCN}」以「${pastAnchor}」为起点，奠定了问题的根基；到了现在，「${nowCard.nameCN}」的「${nowAnchor}」能量正在主导你的处境；未来的「${futureCard.nameCN}」则指向「${futureAnchor}」这一方向。这条线串起来告诉你——</p>`;
-
-  // 动态串联分析
-  html += `<p>${buildStoryline(pastCard, nowCard, futureCard, question, categories)}</p>`;
-
-  // 行动建议：按类别给出3条具体建议
-  html += `<p style="margin-top:0.8rem;"><strong>给你的行动建议：</strong></p><ol style="padding-left:1.2rem;line-height:2;">`;
-  html += buildActionItems(pastCard, nowCard, futureCard, question, categories);
-  html += `</ol>`;
+  // 行动建议
+  html += '<p style="margin-top:0.8rem;"><strong>给你的行动建议：</strong></p>';
+  html += '<ol style="padding-left:1.2rem;line-height:2;">';
+  html += buildActionItems(pastCard, nowCard, futureCard, q, categories);
+  html += '</ol>';
 
   return html;
 }
 
-function buildStoryline(past, now, future, question, categories) {
-  // 基于三张牌的动态关系构建叙事
-  const parts = [];
+function buildStoryline(past, now, future) {
+  var pkw = past.keywords[0] || '';
+  var nkw = now.keywords[0] || '';
+  var fkw = future.keywords[0] || '';
 
-  // 过去→现在的关联
-  const pastNowLink = findLink(past, now);
-  if (pastNowLink) parts.push(pastNowLink);
+  var sharedPN = past.keywords.filter(function(k) {
+    return now.keywords.some(function(tk) { return tk.indexOf(k) >= 0 || k.indexOf(tk) >= 0; });
+  });
+  var sharedNF = now.keywords.filter(function(k) {
+    return future.keywords.some(function(tk) { return tk.indexOf(k) >= 0 || k.indexOf(tk) >= 0; });
+  });
 
-  // 现在→未来的关联
-  const nowFutureLink = findLink(now, future);
-  if (nowFutureLink) parts.push(nowFutureLink);
+  var parts = [];
+  if (sharedPN.length > 0) {
+    parts.push('「' + past.nameCN + '」和「' + now.nameCN + '」通过「' + sharedPN[0] + '」这一共同主题串联起来——过去的影响仍在当下延续。');
+  } else {
+    parts.push('从「' + past.nameCN + '」到「' + now.nameCN + '」的转变，说明你已经走过了' + pkw + '的阶段，正进入' + nkw + '的新局面。');
+  }
 
-  // 整体弧线
-  parts.push(buildArc(past, now, future, categories));
+  if (sharedNF.length > 0) {
+    parts.push('「' + now.nameCN + '」与「' + future.nameCN + '」共享「' + sharedNF[0] + '」的信号，当下的选择将直接影响未来的结果。');
+  } else {
+    parts.push('「' + now.nameCN + '」指向「' + future.nameCN + '」的趋势表明，' + nkw + '的状态将逐步发展为' + fkw + '的方向。');
+  }
 
   return parts.join('');
 }
 
-function findLink(from, to) {
-  // 寻找两张牌之间的关键词关联
-  const shared = from.keywords.filter(k => to.keywords.some(tk => tk.includes(k) || k.includes(tk)));
-  if (shared.length > 0) {
-    return `「${from.nameCN}」中的「${shared[0]}」与「${to.nameCN}」的「${shared[0]}」前后呼应——这不是巧合，而是一个明确的信号：${shared[0]}是你需要重点关注的议题。`;
-  }
-  // 互补线索
-  const complementPairs = [
-    [['束缚', '限制', '困境'], ['自由', '解脱', '突破', '释放']],
-    [['结束', '终结'], ['新的开始', '开始', '重生']],
-    [['冲突', '挑战'], ['胜利', '和谐', '平衡']],
-    [['迷茫', '困惑', '不安'], ['清晰', '希望', '指引']],
-    [['等待', '忍耐'], ['行动', '前进', '进展']],
-  ];
-
-  for (const [groupA, groupB] of complementPairs) {
-    const fromMatch = from.keywords.some(k => groupA.some(a => k.includes(a)));
-    const toMatch = to.keywords.some(k => groupB.some(b => k.includes(b)));
-    if (fromMatch && toMatch) {
-      return `「${from.nameCN}」到「${to.nameCN}」的变化显示了一个重要转折：从${from.keywords.find(k => groupA.some(a => k.includes(a)))}走向${to.keywords.find(k => groupB.some(b => k.includes(b)))}，这说明你所处的阶段正在发生本质的转变。`;
-    }
-  }
-
-  return `「${from.nameCN}」和「${to.nameCN}」的组合提醒你，${from.keywords[0]}和${to.keywords[0]}这两个因素在前后影响着你的处境。`;
-}
-
-function buildArc(past, now, future, categories) {
-  const catText = categories.map(c => categoryLabels[c]).join('和');
-
-  // 判断整体走向
-  const positiveSet = new Set(['新的开始', '胜利', '希望', '成功', '快乐', '爱', '和谐', '丰饶', '富足',
-    '力量', '满足', '幸福', '圆满', '完成', '治愈', '创造力', '自信', '勇气', '成长', '庆祝']);
-  const challengingSet = new Set(['结束', '悲伤', '冲突', '束缚', '焦虑', '困难', '匮乏', '崩塌',
-    '失落', '心碎', '负担', '恐惧', '无力感', '欺骗', '僵局']);
-
-  const allKeywords = [...past.keywords, ...now.keywords, ...future.keywords];
-  const posCount = allKeywords.filter(k => positiveSet.has(k)).length;
-  const negCount = allKeywords.filter(k => challengingSet.has(k)).length;
-
-  if (posCount > negCount * 2) {
-    return `整体来看，三张牌呈现出一条向上的弧线。从「${past.nameCN}」的铺垫，经过「${now.nameCN}」的转折，最终走向「${future.nameCN}」的明确方向——关于「${question}」这件事，牌面给你的信号是积极的。关键在于，你需要在当下阶段保持清醒和主动，不要让好势头从手中滑走。`;
-  } else if (negCount > posCount * 2) {
-    return `这组牌面确实呈现出一些挑战，从「${past.nameCN}」到「${future.nameCN}」的过程中，${catText}方面的压力是真实存在的。但三张牌同时也在告诉你：困难不是死局。尤其「${now.nameCN}」的出现说明，现在正是你可以做出改变的关键节点——改变当下的应对方式，未来的走向就会跟着变化。`;
-  } else {
-    return `三张牌从「${past.nameCN}」到「${future.nameCN}」的演变，展现了一个正在成形中的局面。${catText}方面的结果尚未确定，最大的变量就是「${now.nameCN}」——你在当下的选择和行动，将直接决定未来偏向哪一个方向。这不是宿命的预言，而是提醒你把握当下的力量。`;
-  }
-}
-
 function buildActionItems(past, now, future, question, categories) {
-  let items = '';
+  var items = '';
+  var cat = (categories && categories[0]) ? categories[0] : 'career';
 
-  // 根据过去牌给出第1条建议
-  items += `<li>回顾「${past.nameCN}」给你的启示：${extractAdvice(past, 'past', question, categories[0])}</li>`;
-
-  // 根据现在牌给出第2条建议
-  items += `<li>当下聚焦「${now.nameCN}」的关键：${extractAdvice(now, 'now', question, categories[0])}</li>`;
-
-  // 根据未来牌给出第3条建议
-  items += `<li>为「${future.nameCN}」预示的未来做准备：${extractAdvice(future, 'future', question, categories[0])}</li>`;
+  items += '<li><strong>回顾过去：</strong>' + getAdviceSnippet(past, cat) + '</li>';
+  items += '<li><strong>把握当下：</strong>' + getAdviceSnippet(now, cat) + '</li>';
+  items += '<li><strong>迎接未来：</strong>' + getAdviceSnippet(future, cat) + '</li>';
 
   return items;
 }
 
-function extractAdvice(card, position, question, category) {
-  // 从牌的解读中提取最相关的一句话建议
-  let text = '';
-  if (category === 'career') text = card.career;
-  else if (category === 'love') text = card.love;
-  else if (category === 'health') text = card.health;
-  else text = card.meaning;
+function getAdviceSnippet(card, category) {
+  var text = '';
+  if (category === 'career') text = card.career || '';
+  else if (category === 'love') text = card.love || '';
+  else if (category === 'health') text = card.health || '';
+  else text = card.meaning || '';
 
-  // 从解读中找到最有行动性的一句话（通常包含"建议""需要""可以""应该"等词）
-  const sentences = text.split(/[。！；]/).filter(s => s.trim());
-  const actionSentence = sentences.find(s =>
-    s.includes('建议') || s.includes('需要') || s.includes('应该') ||
-    s.includes('鼓励') || s.includes('适合') || s.includes('提醒')
-  );
-
-  if (actionSentence && position === 'now') {
-    return actionSentence.trim() + '。';
-  } else if (actionSentence) {
-    return actionSentence.trim() + '。' + (position === 'past' ? '不要让这个教训重演。' : '提前做好准备，你会感谢现在的自己。');
-  }
-
-  // 没有明确行动句，基于关键词生成
-  return `把「${card.keywords[0]}」和「${card.keywords[1]}」作为你当前阶段的行动指南，每一项决策都问问自己是否符合这两个原则。`;
+  // 取解读的第一句（到第一个句号）作为摘要
+  var idx = text.indexOf('。');
+  if (idx > 0) return text.substring(0, idx + 1);
+  return text.substring(0, 80);
 }
 
 // ---------- 单张牌专属建议 ----------
 function buildCardAdvice(card, position, question, categories) {
-  let html = '<div class="advice-box"><h4>针对你的问题</h4>';
+  var html = '<div class="advice-box"><h4>针对你的问题</h4>';
 
-  const posContext = {
-    '核心指引': { role: '指引你看到问题本质的钥匙', focus: '请关注牌面传递的核心信息，直接对照你的处境' },
-    '过去': { role: '形成当前局面的深层原因', focus: '回顾过去，找到问题的根源所在' },
-    '现在': { role: '此刻最需要你正视的关键议题', focus: '当下最重要的不是观望，而是针对性地采取行动' },
-    '未来': { role: '当前路径下可能发展的方向', focus: '这个预兆不是结局，而是在提醒你调整现在的选择' }
-  };
+  var q = question || '';
+  var posLabel = position || '核心指引';
 
-  const ctx = posContext[position] || posContext['核心指引'];
+  html += '<p style="color:var(--muted);font-size:0.85rem;margin-bottom:0.6rem;">「' + card.nameCN + '」在「' + posLabel + '」的位置，结合你的问题「' + q + '」来看：</p>';
 
-  html += `<p style="color:var(--muted);font-size:0.85rem;margin-bottom:0.6rem;">「${card.nameCN}」在「${position}」的位置，它的角色是——${ctx.role}。</p>`;
+  for (var i = 0; i < categories.length; i++) {
+    var cat = categories[i];
+    var catName = categoryLabels[cat] || cat;
+    var text = '';
+    if (cat === 'career') text = card.career || '';
+    else if (cat === 'love') text = card.love || '';
+    else if (cat === 'health') text = card.health || '';
 
-  // 针对每个类别生成不重复的精简建议
-  categories.forEach(cat => {
-    const catName = categoryLabels[cat];
-    let detailText = '';
-    if (cat === 'career') detailText = card.career;
-    else if (cat === 'love') detailText = card.love;
-    else if (cat === 'health') detailText = card.health;
+    // 取解读的第一句话作为核心建议
+    var dot = text.indexOf('。');
+    var snippet = dot > 0 ? text.substring(0, dot + 1) : text.substring(0, 80);
 
-    // 提取关键建议句，找第一句有实质行动指向的话
-    const sentences = detailText.split(/[。！；]/).filter(s => s.trim());
-    const keySentence = sentences.find(s =>
-      s.includes('建议') || s.includes('需要') || s.includes('应该') ||
-      s.includes('鼓励') || s.includes('适合') || s.includes('提醒') ||
-      s.includes('可以') || s.includes('要')
-    ) || sentences[0];
+    html += '<p style="margin-top:0.5rem;"><strong>「' + catName + '」角度：</strong>' + snippet + '</p>';
+  }
 
-    html += `<p style="margin-top:0.5rem;"><strong>「${catName}」角度：</strong>${ctx.focus}。${card.nameCN}在这方面的提示是——${keySentence.trim()}。结合你的问题「${question}」，请在接下来的一周内，采取至少一个具体行动来回应这张牌的指引。</p>`;
-  });
+  html += '<p style="margin-top:0.5rem;color:var(--accent-strong);"><strong>行动提示：</strong>从今天开始，把这张牌的指引融入你的日常生活中。问自己：如果' + card.nameCN + '的能量站在我这边，我会做出怎样不同的选择？</p>';
 
   html += '</div>';
   return html;

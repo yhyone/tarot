@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes netlify-cli deploy --prod --dir=\"/Users/mayiming/Desktop/塔罗牌\")"
+    ]
+  }
+}
