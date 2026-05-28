@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>塔罗牌占卜</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- 头部 -->
+    <header class="app-header">
+      <h1 class="app-title">塔罗牌占卜</h1>
+      <p class="app-subtitle">倾听内心，遇见指引</p>
+    </header>
+
+    <!-- 步骤指示器 -->
+    <nav class="steps-indicator" id="steps-nav">
+      <span class="step-dot active" data-step="1">1</span>
+      <span class="step-line"></span>
+      <span class="step-dot" data-step="2">2</span>
+      <span class="step-line"></span>
+      <span class="step-dot" data-step="3">3</span>
+      <span class="step-line"></span>
+      <span class="step-dot" data-step="4">4</span>
+    </nav>
+
+    <!-- 步骤1：选择牌阵 -->
+    <section id="step-spread" class="step active">
+      <h2 class="step-title">选择牌阵</h2>
+      <p class="step-desc">请选择你想要使用的塔罗牌阵</p>
+
+      <div class="spread-cards">
+        <div class="spread-card" data-spread="single">
+          <div class="spread-preview">
+            <svg viewBox="0 0 60 80"><rect x="10" y="10" width="40" height="60" rx="6" fill="rgba(196,154,114,0.3)" stroke="#ad7a49" stroke-width="1.5"/><text x="30" y="46" text-anchor="middle" font-size="18" fill="#ad7a49">1</text></svg>
+          </div>
+          <div class="spread-info">
+            <h3 class="spread-name">单张牌</h3>
+            <p class="spread-desc-text">最简单的牌阵，适合每日指引或快速问答。抽取一张牌，直击问题核心。</p>
+            <div class="spread-rule">
+              <strong>规则：</strong>心中默念问题，抽取一张牌作为答案与指引。
+            </div>
+          </div>
+          <button class="btn btn-outline" data-spread="single">选择</button>
+        </div>
+
+        <div class="spread-card" data-spread="three">
+          <div class="spread-preview">
+            <svg viewBox="0 0 140 80"><rect x="2" y="10" width="40" height="60" rx="6" fill="rgba(196,154,114,0.25)" stroke="#ad7a49" stroke-width="1"/><text x="22" y="46" text-anchor="middle" font-size="11" fill="#ad7a49">过去</text><rect x="50" y="10" width="40" height="60" rx="6" fill="rgba(196,154,114,0.35)" stroke="#ad7a49" stroke-width="1.5"/><text x="70" y="46" text-anchor="middle" font-size="11" fill="#ad7a49">现在</text><rect x="98" y="10" width="40" height="60" rx="6" fill="rgba(196,154,114,0.25)" stroke="#ad7a49" stroke-width="1"/><text x="118" y="46" text-anchor="middle" font-size="11" fill="#ad7a49">未来</text></svg>
+          </div>
+          <div class="spread-info">
+            <h3 class="spread-name">三张牌</h3>
+            <p class="spread-desc-text">经典的三牌阵，分别代表过去·现在·未来，帮助你全面理解问题的来龙去脉。</p>
+            <div class="spread-rule">
+              <strong>规则：</strong>依次抽取三张牌：第一张代表过去的因，第二张代表现在的状态，第三张代表未来的趋势。
+            </div>
+          </div>
+          <button class="btn btn-outline" data-spread="three">选择</button>
+        </div>
+      </div>
+
+      <!-- 抽牌方式 -->
+      <div class="draw-mode-section" id="draw-mode-section" style="display:none">
+        <h3 class="draw-mode-title">抽牌方式</h3>
+        <div class="draw-mode-options">
+          <label class="draw-mode-card" id="mode-random">
+            <input type="radio" name="drawMode" value="random">
+            <span class="mode-content">
+              <span class="mode-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 8c1.5 1.5 2.5 2.5 4 4s2.5 2.5 4 4M8 16c1.5-1.5 2.5-2.5 4-4s2.5-2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </span>
+              <span class="mode-label">随机抽取</span>
+              <span class="mode-desc">系统随机选牌，直接翻开查看</span>
+            </span>
+          </label>
+          <label class="draw-mode-card" id="mode-selfpick">
+            <input type="radio" name="drawMode" value="selfpick">
+            <span class="mode-content">
+              <span class="mode-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              </span>
+              <span class="mode-label">自选牌</span>
+              <span class="mode-desc">展示6张牌面，凭直觉选出属于你的牌</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="step-actions" id="spread-actions" style="display:none">
+        <button class="btn btn-primary" id="btn-to-draw">开始抽牌 →</button>
+      </div>
+    </section>
+
+    <!-- 步骤2：抽牌界面 -->
+    <section id="step-draw" class="step">
+      <h2 class="step-title" id="draw-title">请抽取塔罗牌</h2>
+      <p class="step-desc" id="draw-pos-desc"></p>
+
+      <div class="draw-grid" id="draw-area">
+        <!-- 动态生成 -->
+      </div>
+
+      <div class="step-actions" id="draw-actions" style="display:none">
+        <button class="btn btn-ghost" id="btn-redraw">重新抽取</button>
+        <button class="btn btn-primary" id="btn-view-result">下一步：选择解读方向 →</button>
+      </div>
+    </section>
+
+    <!-- 步骤3：解读方向和问题 -->
+    <section id="step-category" class="step">
+      <h2 class="step-title">解读方向 & 你的问题</h2>
+      <p class="step-desc">你已抽到了塔罗牌的指引，请选择想了解的方面并写下问题</p>
+
+      <div class="category-group">
+        <h3 class="category-label">解读方向（可多选）</h3>
+        <div class="category-chips">
+          <label class="category-chip">
+            <input type="checkbox" name="category" value="career">
+            <span class="chip-content">
+              <span class="chip-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><rect x="2" y="4" width="20" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="4" x2="12" y2="2" stroke="currentColor" stroke-width="1.5"/><line x1="9" y1="2" x2="15" y2="2" stroke="currentColor" stroke-width="1.5"/></svg>
+              </span>
+              <span class="chip-label">事业</span>
+            </span>
+          </label>
+          <label class="category-chip">
+            <input type="checkbox" name="category" value="love">
+            <span class="chip-content">
+              <span class="chip-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              </span>
+              <span class="chip-label">婚姻/爱情</span>
+            </span>
+          </label>
+          <label class="category-chip">
+            <input type="checkbox" name="category" value="health">
+            <span class="chip-content">
+              <span class="chip-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2a3 3 0 0 0-3 3v1H6a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h1v1a3 3 0 0 0 3 3h4a3 3 0 0 0 3-3v-1h1a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3h-3V5a3 3 0 0 0-3-3z" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg>
+              </span>
+              <span class="chip-label">健康</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="question-group">
+        <label class="question-label" for="question-input">你的具体问题</label>
+        <p class="question-hint">结合你刚抽到的牌，写下你想了解的具体问题。问题越具体，解读越有针对性。</p>
+        <textarea id="question-input" class="question-input"
+          placeholder="写下你希望塔罗帮助解答的问题…"
+          maxlength="200" rows="3"></textarea>
+        <span class="question-count"><span id="char-count">0</span>/200</span>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-ghost" id="btn-back-draw">← 返回重新抽牌</button>
+        <button class="btn btn-primary" id="btn-show-result">查看解读 ✦</button>
+      </div>
+    </section>
+
+    <!-- 步骤4：结果展示 -->
+    <section id="step-result" class="step">
+      <h2 class="step-title">占卜结果</h2>
+      <p class="step-desc" id="result-spread-name"></p>
+
+      <div id="result-summary" class="result-summary" style="display:none"></div>
+
+      <div id="result-container">
+        <!-- 动态生成 -->
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-ghost" id="btn-redraw-result">重新抽取</button>
+        <button class="btn btn-primary" id="btn-restart">重新开始</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 牌面放大弹窗 -->
+  <div class="modal" id="card-modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <img id="modal-img" src="" alt="塔罗牌">
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
